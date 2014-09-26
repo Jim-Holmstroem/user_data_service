@@ -1,0 +1,4 @@
+POST /api/v1/users
+GET /api/v1/users/<name>
+PATCH /api/v1/users/<name>
+DELETE /api/v1/users/<name>
