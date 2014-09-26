@@ -1,6 +1,10 @@
 from __future__ import print_function
 
 from flask import json
+
+import hashlib
+import uuid
+
 from functools import wraps
 
 
