@@ -11,17 +11,21 @@ class Database(object):
         pass
 
     @abstractmethod
-    def create(self):
+    def create(self, name):
         pass
 
     @abstractmethod
-    def read(self):
+    def get(self, name):
         pass
 
     @abstractmethod
-    def update(self):
+    def update(self, name, data):
         pass
 
     @abstractmethod
-    def delete(self):
+    def delete(self, name):
+        pass
+
+    @abstractmethod
+    def close(self):
         pass

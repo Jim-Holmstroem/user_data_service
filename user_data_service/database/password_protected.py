@@ -8,11 +8,35 @@ class PasswordProtectedDatabase(Database):
     """
     def __init__(self,
         database,
-
     ):
-        pass
+        self.database = database
 
-    def (self,
+    def create(self, data):
+        return self.database.create(
+            name,
+            data,
+            new_password_information=self.password_information(
+                data["password"]
+            )
+        )
+
+    def exists(self, name):
+        return self.database.exists(name)
+
+    def get(self, name):
+        return self.database.get(name)
+
+    def delete(self, name):
+        # FIXME no password check..
+        return self.database.delete(name)
+
+    def update(self, data):
+        # FIXME no password check..
+        password_information(password, salt=lambda: salt_value) == self.database._get_password_informamtion(name)
+        return self.update(data)
+
+
+    def password_information(self,
         password,
         salt=lambda: uuid.uuid4().hex,
         hash_=lambda w, salt: hashlib.sha512(w + salt).hexdigest()
