@@ -1,20 +1,11 @@
-#!/usr/bin/env python
 from __future__ import print_function
 
-from functools import wraps
-from flask import Flask, json, views
+from flask import Flask, views
+
+from utils import return_json
+
 
 app = Flask(__name__)
-
-
-def return_json(f):
-    @wraps(f)
-    def _return_json(*args, **kwargs):
-        return json.dumps(
-            f(*args, **kwargs)
-        )
-
-    return _return_json
 
 
 class User(views.MethodView):
@@ -35,7 +26,3 @@ class User(views.MethodView):
 
 
 app.add_url_rule('/api/v1/users/<string:name>', view_func=User.as_view('user'))
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
