@@ -19,7 +19,7 @@ class SQlite3Database(Database):
             "id TEXT PRIMARY KEY NOT NULL,"  # TODO char(N)
             "name TEXT NOT NULL UNIQUE,"
             "email TEXT NOT NULL,"
-            "password_hash TEXT NOT NULL,"
+            "password_hash TEXT NOT NULL,"  # TODO depends on PasswordProtectedDatabase structure (possible but currently too much work to break it out)
             "password_salt TEXT NOT NULL"
         ")"
         with closing(self.conn.cursor()) as c:
@@ -49,7 +49,7 @@ class SQlite3Database(Database):
     def update(self, name, data):
         with closing(self.conn.cursor()) as c:
 
-    def _get_password_information(self, name):
+    def _get_password_information(self, name):  # TODO depends on PasswordProtectedDatabase structure (possible but currently too much work to break it out)
         with closing(self.conn.cursor()) as c:
 
     def close(self):

@@ -1,15 +1,31 @@
 from __future__ import print_function
 
+import hashlib
+import uuid
+
 from database import Database
 
 
 class PasswordProtectedDatabase(Database):
-    """Higher order database
+    """Higher order database, takes a database and returns a password
+    protected one.
+
+    Arguments
+    ---------
+    salt :: () -> salt_value
+        A salt factory.
+
+    hash_ :: password, salt_value -> hash_value
+        Generates the salted hash.
     """
     def __init__(self,
         database,
+        salt=lambda: uuid.uuid4().hex,
+        hash_=lambda w, salt: hashlib.sha512(w + salt).hexdigest(),
     ):
         self.database = database
+        self.salt = salt
+        self.hash_ = hash_
 
     def create(self, data):
         return self.database.create(
@@ -35,11 +51,14 @@ class PasswordProtectedDatabase(Database):
         password_information(password, salt=lambda: salt_value) == self.database._get_password_informamtion(name)
         return self.update(data)
 
+    def _get_password_informamtion(self, name):
+        return self.database._get_password_informamtion(name)
+
 
     def password_information(self,
         password,
-        salt=lambda: uuid.uuid4().hex,
-        hash_=lambda w, salt: hashlib.sha512(w + salt).hexdigest()
+        salt=None,
+        hash_=None,
     ):
         """Creates a hash, salt pair from the password
 
@@ -53,6 +72,9 @@ class PasswordProtectedDatabase(Database):
         hash_value, salt_value : str, str
             The hashed password and the salt used in hex strings.
         """
+        salt = self.salt if salt is None else salt
+        hash_ = self.hash_ if hash_ is None else hash_
+
         salt_value = salt()
 
         hash_value = hash_(password, salt_value)
