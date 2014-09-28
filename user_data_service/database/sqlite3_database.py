@@ -5,11 +5,11 @@ from contextlib import closing
 import uuid
 import sqlite3
 
-from database import Database
+from database import ProtectableDatabase
 from ..utils import values
 
 
-class SQLite3Database(Database):
+class SQLite3Database(ProtectableDatabase):
     def __init__(
         self,
         database_name="users.db",
@@ -17,22 +17,6 @@ class SQLite3Database(Database):
     ):
         self.uuid = uuid
         self.database_name = database_name
-
-    def connect(self):
-        self.conn = sqlite3.connect(self.database_name)
-        schema_setup = (
-            "CREATE TABLE IF NOT EXISTS users("
-                "id TEXT PRIMARY KEY NOT NULL,"
-                "name TEXT NOT NULL UNIQUE,"
-                "email TEXT NOT NULL,"
-                "password_hash TEXT NOT NULL,"
-                "password_salt TEXT NOT NULL"
-            ")"  # TODO depends on PasswordProtectedDatabase structure
-                 # (possible but currently too much work to break it out)
-                 # also related to _get_password_information
-        )
-        with closing(self.conn.cursor()) as c:
-            c.execute(schema_setup)
 
     def create(self, name, data, new_password_information=("", "")):
         with closing(self.conn.cursor()) as c:
@@ -89,26 +73,39 @@ class SQLite3Database(Database):
     def update(self, name, data):
         valid_keys = {"email", "name"}
         valid_update_keys = set(data.keys()) & valid_keys
-        valid_update_values = values(valid_update_keys)(data)
+        if valid_update_keys:
+            valid_update_values = values(valid_update_keys)(data)
 
-        variable_definitions = ", ".join(
-            map(
-                "{} = ?".format,
-                valid_update_keys
+            variable_definitions = ", ".join(
+                map(
+                    "{} = ?".format,
+                    valid_update_keys
+                )
             )
-        )
-        update_queary_template = (
-            "UPDATE users SET {variable_definitions}"
-            "WHERE name=?"
-        ).format(
-            variable_definitions=variable_definitions
-        )
+            update_queary_template = (
+                "UPDATE users SET {variable_definitions}"
+                "WHERE name=?"
+            ).format(
+                variable_definitions=variable_definitions
+            )
 
+            with closing(self.conn.cursor()) as c:
+                c.execute(
+                    update_queary_template,
+                    valid_update_values + (name, )
+                )
+
+    def _get_password_information(self, name):
         with closing(self.conn.cursor()) as c:
             c.execute(
-                update_queary_template,
-                valid_update_values + (name, )
+                "SELECT password_hash, password_salt FROM users WHERE name=?",
+                (
+                    name,
+                )
             )
+            data = c.fetchone()
+
+            return data
 
     def _set_password_information(self, name, password_information):
         with closing(self.conn.cursor()) as c:
@@ -120,16 +117,21 @@ class SQLite3Database(Database):
                 password_information + (name, )
             )
 
-    def _get_password_information(self, name):
+    def connect(self):
+        self.conn = sqlite3.connect(self.database_name)
+        schema_setup = (
+            "CREATE TABLE IF NOT EXISTS users("
+                "id TEXT PRIMARY KEY NOT NULL,"
+                "name TEXT NOT NULL UNIQUE,"
+                "email TEXT NOT NULL,"
+                "password_hash TEXT NOT NULL,"
+                "password_salt TEXT NOT NULL"
+            ")"  # TODO depends on PasswordProtectedDatabase structure
+                 # (possible but currently too much work to break it out)
+                 # also related to _get_password_information
+        )
         with closing(self.conn.cursor()) as c:
-            c.execute(
-                "SELECT password_hash, password_salt FROM users WHERE name=?",
-                (
-                    name,
-                )
-            )
-
-            return data
+            c.execute(schema_setup)
 
     def close(self):
         self.conn.close()

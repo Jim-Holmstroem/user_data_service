@@ -5,20 +5,26 @@ from nose.tools import (
     assert_true,
     assert_false,
 )
+
 from functools import partial
 
+from ..password_protected import PasswordProtected
 from ..sqlite3_database import SQLite3Database
-from ...utils import email, values, powerdict
+from ...utils import email, password, values, powerdict
 
 
-class test_SQLite3Database(object):
-    def setup(self):
-        self.db = SQLite3Database(':memory:')
+class test_PasswordProtected(object):
+    def setup(self):  # TODO easy to instead inject the Database used
+        self.db = PasswordProtected(SQLite3Database(':memory:'))
         self.db.connect()
 
     def test_create_delete(self):
-        def _test(name):
-            original_data = {'name': name, 'email': email(name)}
+        def _test(name):  # TODO remove code duplication (compare test_sqlite)
+            original_data = {
+                'name': name,
+                'email': email(name),
+                'password': password(name),
+            }
             self.db.create(
                 name,
                 original_data
@@ -29,17 +35,20 @@ class test_SQLite3Database(object):
             assert_equals(data["name"], name)
             assert_equals(data["email"], email(name))
 
-            self.db.delete(name)
+            self.db.delete(name, {'password': password(name)})
             assert_false(self.db.exists(name))
 
         _test('test')
 
     def test_update(self):
         def _test(name, updates):  # TODO combine yield and setup/teardown
-            original_data = {'name': name, 'email': email(name)}
+            original_data = {
+                'name': name,
+                'email': email(name),
+            }
             self.db.create(
                 name,
-                original_data
+                dict(original_data, password=password(name))
             )
             self.db.update(name, updates)
             name_updated = "name" in updates
@@ -62,13 +71,17 @@ class test_SQLite3Database(object):
                 not_updated_values(data),
                 not_updated_values(original_data),
             )
-            self.db.delete(new_name)
+            self.db.delete(new_name, {'password': password(name)})
             assert_false(self.db.exists(name))
 
         update_data = {'name': 'somethingelse', 'email': 'me@domain.org'}
         map(
             partial(_test, 'test'),
-            powerdict(update_data)
+            map(
+                lambda update_data:
+                    dict(update_data, password=password('test')),
+                powerdict(update_data)
+            )
         )
 
     def teardown(self):

@@ -1,8 +1,33 @@
 from __future__ import print_function
 
+
+from itertools import combinations, chain
+from functools import wraps, partial
+
 from flask import json
 
-from functools import wraps
+
+email = '{}@domain.com'.format
+
+
+def password(name):
+    return name[::-1]
+
+
+def powerset(set_):
+    return chain.from_iterable(
+        map(
+            partial(combinations, set_),
+            range(len(set_) + 1)
+        )
+    )
+
+
+def powerdict(dict_):
+    return map(
+        dict,
+        powerset(dict_.items())
+    )
 
 
 def values(keys):

@@ -11,7 +11,7 @@ class Database(object):
         pass
 
     @abstractmethod
-    def create(self, name):
+    def create(self, name, data):
         pass
 
     @abstractmethod
@@ -32,4 +32,22 @@ class Database(object):
 
     @abstractmethod
     def close(self):
+        pass
+
+
+class ProtectableDatabase(Database):
+    @abstractmethod
+    def create(self, name, data, new_password_information=("", "")):
+        pass
+
+    @abstractmethod
+    def delete(self, name, data):
+        pass
+
+    @abstractmethod
+    def _get_password_information(self, name):
+        pass
+
+    @abstractmethod
+    def _set_password_information(self, name, password_information):
         pass
