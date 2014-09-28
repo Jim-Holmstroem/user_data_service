@@ -45,6 +45,7 @@ class test_PasswordProtected(object):
             original_data = {
                 'name': name,
                 'email': email(name),
+                'password': password(name),
             }
             self.db.create(
                 name,
@@ -57,9 +58,9 @@ class test_PasswordProtected(object):
             )
             new_name = updates["name"] if name_updated else name
             data = self.db.get(new_name)
-            updated_values = values(updates.keys())
+            updated_values = values(set(updates.keys()) - {"password"})
             not_updated_values = values(
-                set(original_data.keys()) - set(updates.keys())
+                set(original_data.keys()) - set(updates.keys()) - {"password"}
             )
             map(
                 assert_equals,

@@ -109,6 +109,4 @@ class PasswordProtected(Database):
         hash_value,
         salt_value
     ):
-        print(self.hash_(password, salt_value))
-        print(hash_value)
         return self.hash_(password, salt_value) == hash_value
