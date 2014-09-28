@@ -5,7 +5,7 @@ from flask import Flask, views
 from utils import return_json
 
 
-app = Flask(__name__)
+app = Flask("user_data_service")
 
 
 class User(views.MethodView):

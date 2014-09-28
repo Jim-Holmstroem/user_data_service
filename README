@@ -1,2 +1,9 @@
 user_data_service
 =================
+Depency
+-------
+flask
+
+Run
+---
+./main.py

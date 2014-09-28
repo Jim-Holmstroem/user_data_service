@@ -1,56 +1,135 @@
 from __future__ import print_function
 
-import uuid
-
-
 from contextlib import closing
+
+import uuid
 import sqlite3
+
 from database import Database
+from ..utils import values
 
 
-class SQlite3Database(Database):
-    def __init__(self,
+class SQLite3Database(Database):
+    def __init__(
+        self,
         database_name="users.db",
         uuid=lambda: uuid.uuid4().hex,
     ):
         self.uuid = uuid
-        self.conn = sqlite3.connect(database_name)
-        schema_setup = "CREATE TABLE IF NOT EXISTS users("
-            "id TEXT PRIMARY KEY NOT NULL,"  # TODO char(N)
-            "name TEXT NOT NULL UNIQUE,"
-            "email TEXT NOT NULL,"
-            "password_hash TEXT NOT NULL,"  # TODO depends on PasswordProtectedDatabase structure (possible but currently too much work to break it out)
-            "password_salt TEXT NOT NULL"
-        ")"
+        self.database_name = database_name
+
+    def connect(self):
+        self.conn = sqlite3.connect(self.database_name)
+        schema_setup = (
+            "CREATE TABLE IF NOT EXISTS users("
+                "id TEXT PRIMARY KEY NOT NULL,"
+                "name TEXT NOT NULL UNIQUE,"
+                "email TEXT NOT NULL,"
+                "password_hash TEXT NOT NULL,"
+                "password_salt TEXT NOT NULL"
+            ")"  # TODO depends on PasswordProtectedDatabase structure
+                 # (possible but currently too much work to break it out)
+                 # also related to _get_password_information
+        )
         with closing(self.conn.cursor()) as c:
             c.execute(schema_setup)
 
     def create(self, name, data, new_password_information=("", "")):
         with closing(self.conn.cursor()) as c:
             c.execute(
-                "INSERT INTO users (?, ?, ?, ?, ?)",
+                "INSERT INTO users VALUES (?, ?, ?, ?, ?)",
                 (
                     self.uuid(),
                     data["name"],
                     data["email"],
-                ) +\
+                ) +
                 new_password_information
             )
 
     def exists(self, name):
         with closing(self.conn.cursor()) as c:
+            c.execute(
+                "SELECT COUNT(*) FROM users WHERE name=?",
+                (
+                    name,
+                )
+            )
+            count, = c.fetchone()
+            exists = count > 0
+
+            return exists
 
     def get(self, name):
         with closing(self.conn.cursor()) as c:
+            c.execute(
+                "SELECT id, name, email FROM users WHERE name=?",
+                (
+                    name,
+                )
+            )
+            raw_data = c.fetchone()  # TODO raise understable exception in
+                                     # case of missing (shouldn't occure here
+                                     # but better safe then sorry)
+            data = dict(zip(
+                ("id", "name", "email"),
+                raw_data
+            ))
+
+            return data
 
     def delete(self, name):
         with closing(self.conn.cursor()) as c:
+            c.execute(
+                "DELETE FROM users WHERE name=?",
+                (
+                    name,
+                )
+            )
 
     def update(self, name, data):
-        with closing(self.conn.cursor()) as c:
+        valid_keys = {"email", "name"}
+        valid_update_keys = set(data.keys()) & valid_keys
+        valid_update_values = values(valid_update_keys)(data)
 
-    def _get_password_information(self, name):  # TODO depends on PasswordProtectedDatabase structure (possible but currently too much work to break it out)
+        variable_definitions = ", ".join(
+            map(
+                "{} = ?".format,
+                valid_update_keys
+            )
+        )
+        update_queary_template = (
+            "UPDATE users SET {variable_definitions}"
+            "WHERE name=?"
+        ).format(
+            variable_definitions=variable_definitions
+        )
+
         with closing(self.conn.cursor()) as c:
+            c.execute(
+                update_queary_template,
+                valid_update_values + (name, )
+            )
+
+    def _set_password_information(self, name, password_information):
+        with closing(self.conn.cursor()) as c:
+            c.execute(
+                (
+                    "UPDATE users SET password_hash = ?, password_salt = ?"
+                    "WHERE name=?"
+                ),
+                password_information + (name, )
+            )
+
+    def _get_password_information(self, name):
+        with closing(self.conn.cursor()) as c:
+            c.execute(
+                "SELECT password_hash, password_salt FROM users WHERE name=?",
+                (
+                    name,
+                )
+            )
+
+            return data
 
     def close(self):
         self.conn.close()

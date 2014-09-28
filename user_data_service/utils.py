@@ -2,10 +2,15 @@ from __future__ import print_function
 
 from flask import json
 
-import hashlib
-import uuid
-
 from functools import wraps
+
+
+def values(keys):
+    def _values(sequence):
+        data = tuple(map(sequence.__getitem__, keys))
+        return data
+
+    return _values
 
 
 def return_json(f):

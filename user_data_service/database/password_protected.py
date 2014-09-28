@@ -21,13 +21,13 @@ class PasswordProtectedDatabase(Database):
     def __init__(self,
         database,
         salt=lambda: uuid.uuid4().hex,
-        hash_=lambda w, salt: hashlib.sha512(w + salt).hexdigest(),
+        hash_=lambda w, salt: hashlib.sha512(w + salt).hexdigest(),  # TODO use Passlib which uses PBKDF2 (rule #1 in security: never make your own)
     ):
         self.database = database
         self.salt = salt
         self.hash_ = hash_
 
-    def create(self, data):
+    def create(self, name, data):
         return self.database.create(
             name,
             data,

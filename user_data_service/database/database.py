@@ -27,5 +27,9 @@ class Database(object):
         pass
 
     @abstractmethod
+    def connect(self):
+        pass
+
+    @abstractmethod
     def close(self):
         pass
