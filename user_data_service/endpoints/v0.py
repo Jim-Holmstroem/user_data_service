@@ -16,7 +16,6 @@ def register_user_endpoint(application, method_view, version):
     )
     application.add_url_rule(
         '{prefix}/<string:name>'.format(prefix=prefix),
-        defaults={'name': None},
         view_func=user_view,
         methods=['GET', ]
     )
@@ -30,23 +29,32 @@ def register_user_endpoint(application, method_view, version):
 class UserAPIv0(views.MethodView):
     pretty = True
 
+    # TODO use flask.jsonify instead see utils.return_json for more information
     @return_json(pretty)
     def get(self, name=None):
-        return self.__class__.jsonify_user(
-            a='test'
+        return dict(
+            name=name,
         )
 
     @return_json(pretty)
     def post(self):
-        return {'a': 'something'}
+        return dict(
+            a="posted",
+        )
 
     @return_json(pretty)
     def delete(self, name):
-        return {'a': 'simple_delete'}
+        return dict(
+            a='delete',
+            name=name,
+        )
 
     @return_json(pretty)
     def patch(self, name):
-        return {'a': 'simple_patch'}
+        return dict(
+            a='patch',
+            name=name,
+        )
 
 
 def install(application):
