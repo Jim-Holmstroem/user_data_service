@@ -4,10 +4,16 @@ from __future__ import print_function
 from itertools import combinations, chain
 from functools import wraps, partial
 
-from flask import json
+import json
 
+import flask
 
 email = '{}@domain.com'.format
+
+
+class UserDataException(Exception):
+    """UserDataException
+    """
 
 
 def password(name):
@@ -38,11 +44,39 @@ def values(keys):
     return _values
 
 
-def return_json(f):
-    @wraps(f)
-    def _return_json(*args, **kwargs):
-        return json.dumps(
-            f(*args, **kwargs)
-        )
+def return_json(pretty=False):
+    def _return_json(f):
+        @wraps(f)
+        def __return_json(self, **kwargs):
+            """
+            Parameters
+            ----------
+            dict_method :: *args, **kwargs -> dict
+                A method returning a dict containing the wanted information.
+
+            Returns
+            -------
+            response_method :: *args, **kwargs -> flask.Response
+                Wraps the dict_method to instead return a flask.Response with
+                proper mime etc.
+
+            Note
+            ----
+            replacing flask.jsonify to go around an issue where flask.jsonify
+            is using simplejson (as default import and json as fallback) with
+            keyword argument indent.
+
+            Note
+            ----
+            This is not header request nor flask config aware.
+            """
+            pretty_json_config = {'indent': 4} if pretty else {'indent': None}
+            return flask.Response(
+                response=json.dumps(kwargs, **pretty_json_config),
+                status=200,
+                mimetype='application/json'
+            )
+
+        return __return_json
 
     return _return_json
