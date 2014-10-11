@@ -1,8 +1,8 @@
 from __future__ import print_function
 
-from flask import views
+from flask import views, request, g
 
-from ..utils import return_json
+from ..utils import return_json, database
 
 
 def register_user_endpoint(application, method_view, version):
@@ -38,12 +38,11 @@ class UserAPIv0(views.MethodView):
 
     @return_json(pretty)
     def post(self):
-        return dict(
-            a="posted",
-        )
+        return dict(request_name=request.get_json())
 
     @return_json(pretty)
     def delete(self, name):
+        print(g._database)
         return dict(
             a='delete',
             name=name,
@@ -54,6 +53,7 @@ class UserAPIv0(views.MethodView):
         return dict(
             a='patch',
             name=name,
+            sent_data=request.get_json()
         )
 
 

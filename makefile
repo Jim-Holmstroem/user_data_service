@@ -7,25 +7,31 @@ test:
 
 URL = localhost:5000/api/v0/users
 USER = test
+PASSWORD = abc123
+CURLFLAGS = -s
 
-try: try_post try_get try_get_specific try_delete try_patch
+try: try_post try_get try_get_specific try_delete try_patch try_patch_password
 
 try_post:
-	curl -s -X "POST" ${URL}
+	curl ${CURLFLAGS} -H 'Content-Type: application/json' -d '{"name": "another"}' -X 'POST' ${URL}
 	@echo ""
 
 try_get:
-	curl -s -X "GET" ${URL}
+	curl ${CURLFLAGS} -X "GET" ${URL}
 	@echo ""
 
 try_get_specific:
-	curl -s -X "GET" ${URL}/${USER}
+	curl ${CURLFLAGS} -X "GET" ${URL}/${USER}
 	@echo ""
 
 try_delete:
-	curl -s -X "DELETE" ${URL}/${USER}
+	curl ${CURLFLAGS} -H 'Content-Type: application/json' -d '{"password": "${PASSWORD}"}' -X "DELETE" ${URL}/${USER}
 	@echo ""
 
 try_patch:
-	curl -s -X "PATCH" ${URL}/${USER}
+	curl ${CURLFLAGS} -H 'Content-Type: application/json' -d '{"name": "another", "password": "${PASSWORD}"}' -X "PATCH" ${URL}/${USER}
+	@echo ""
+
+try_patch_password:
+	curl ${CURLFLAGS} -H 'Content-Type: application/json' -d '{"new_password": "abc234", "password": "${PASSWORD}"}' -X "PATCH" ${URL}/${USER}
 	@echo ""

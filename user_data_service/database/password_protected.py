@@ -76,6 +76,8 @@ class PasswordProtected(Database):
     def close(self):
         return self.database.close()
 
+    def init(self):
+        return self.database.init()
     def password_information(
         self,
         password,

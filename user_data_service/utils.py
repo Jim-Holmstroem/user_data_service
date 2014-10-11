@@ -8,8 +8,13 @@ import json
 
 from werkzeug.exceptions import default_exceptions, HTTPException
 import flask
+from flask import g
 
 email = '{}@domain.com'.format
+
+
+def database():
+    return getattr(g, '_database', None)
 
 
 class UserDataException(Exception):

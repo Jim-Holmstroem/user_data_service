@@ -14,9 +14,10 @@ from ...utils import email, password, values, powerdict
 
 
 class test_PasswordProtected(object):
-    def setup(self):  # TODO easy to instead inject the Database used
+    def setup(self):  # TODO factor out to instead inject the Database used
         self.db = PasswordProtected(SQLite3Database(':memory:'))
         self.db.connect()
+        self.db.init()
 
     def test_create_delete(self):
         def _test(name):  # TODO remove code duplication (compare test_sqlite)

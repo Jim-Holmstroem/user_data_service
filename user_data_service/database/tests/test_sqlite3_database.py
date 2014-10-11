@@ -15,6 +15,7 @@ class test_SQLite3Database(object):
     def setup(self):
         self.db = SQLite3Database(':memory:')
         self.db.connect()
+        self.db.init()
 
     def test_create_delete(self):
         def _test(name):

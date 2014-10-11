@@ -5,8 +5,8 @@ from contextlib import closing
 import uuid
 import sqlite3
 
-from database import ProtectableDatabase
 from ..utils import values
+from database import ProtectableDatabase
 
 
 class SQLite3Database(ProtectableDatabase):
@@ -119,7 +119,12 @@ class SQLite3Database(ProtectableDatabase):
 
     def connect(self):
         self.conn = sqlite3.connect(self.database_name)
-        schema_setup = (
+
+    def close(self):
+        self.conn.close()
+
+    def init(self):
+        schema = (  # users.sql
             "CREATE TABLE IF NOT EXISTS users("
                 "id TEXT PRIMARY KEY NOT NULL,"
                 "name TEXT NOT NULL UNIQUE,"
@@ -131,7 +136,4 @@ class SQLite3Database(ProtectableDatabase):
                  # also related to _get_password_information
         )
         with closing(self.conn.cursor()) as c:
-            c.execute(schema_setup)
-
-    def close(self):
-        self.conn.close()
+            c.execute(schema)

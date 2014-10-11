@@ -34,6 +34,10 @@ class Database(object):
     def close(self):
         pass
 
+    @abstractmethod
+    def init(self):
+        pass
+
 
 class ProtectableDatabase(Database):
     @abstractmethod
