@@ -29,6 +29,7 @@ class SQLite3Database(ProtectableDatabase):
                 ) +
                 new_password_information
             )
+            self.conn.commit()  # FIXME this must be commited
 
     def exists(self, name):
         with closing(self.conn.cursor()) as c:
@@ -54,6 +55,7 @@ class SQLite3Database(ProtectableDatabase):
             raw_data = c.fetchone()  # TODO raise understable exception in
                                      # case of missing (shouldn't occure here
                                      # but better safe then sorry)
+
             data = dict(zip(
                 ("id", "name", "email"),
                 raw_data
@@ -61,7 +63,7 @@ class SQLite3Database(ProtectableDatabase):
 
             return data
 
-    def delete(self, name):
+    def delete(self, name, data):
         with closing(self.conn.cursor()) as c:
             c.execute(
                 "DELETE FROM users WHERE name=?",

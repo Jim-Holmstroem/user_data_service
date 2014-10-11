@@ -31,30 +31,35 @@ class UserAPIv0(views.MethodView):
 
     # TODO use flask.jsonify instead see utils.return_json for more information
     @return_json(pretty)
-    def get(self, name=None):
-        return dict(
-            name=name,
-        )
+    def get(self, name):
+        if g._database.exists(name):
+            data = g._database.get(name)
+
+            return dict(  # FIXME: always have a top context {"user": {"name":..}}} or such
+                data=data,
+            )
+        else:
+            1/0  # FIXME proper handling of "404"
 
     @return_json(pretty)
     def post(self):
-        return dict(request_name=request.get_json())
+        #FIXME if name is missing (how about password?)
+        #FIXME if email is missing
+        data = request.get_json()
+        g._database.create(data["name"], data)
+        return dict()  # FIXME what is the proper response?
 
     @return_json(pretty)
     def delete(self, name):
-        print(g._database)
-        return dict(
-            a='delete',
-            name=name,
-        )
+        data = request.get_json()
+        g._database.delete(name, data)
+        return dict()  # FIXME what is the proper response?
 
     @return_json(pretty)
     def patch(self, name):
-        return dict(
-            a='patch',
-            name=name,
-            sent_data=request.get_json()
-        )
+        data = request.get_json()
+        g._database.update(name, data)
+        return dict()  # FIXME what is the proper response?
 
 
 def install(application):

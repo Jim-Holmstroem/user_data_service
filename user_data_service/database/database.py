@@ -23,7 +23,7 @@ class Database(object):
         pass
 
     @abstractmethod
-    def delete(self, name):
+    def delete(self, name, data):
         pass
 
     @abstractmethod

@@ -5,16 +5,13 @@ from operator import methodcaller
 from flask import Flask, g
 
 from utils import always_json_response
-from database.sqlite3_database import SQLite3Database
-from database.password_protected import PasswordProtected
-from endpoints import v0
 
 
 class Service(object):
     def __init__(
         self,
-        database=SQLite3Database(':memory:'),
-        endpoints=(v0,)
+        database,
+        endpoints
     ):
         self.application = always_json_response(Flask)("user_data_service")
         self.endpoints = endpoints
@@ -22,12 +19,11 @@ class Service(object):
 
     def run(self, *args, **kwargs):
         def init_database():
-            print('init')
             self.database.connect()
-            self.database.init()
+            self.database.init()  # FIXME :memory: returns new after each "connect"
 
-        def setup_database():
-            self.database.connect()
+        def setup_database():  # TODO verify thread safe?
+            self.database.connect()  # FIXME fix this with proper context etc
             g._database = self.database
 
         def teardown_database(exception):
