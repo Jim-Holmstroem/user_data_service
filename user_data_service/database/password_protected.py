@@ -13,14 +13,14 @@ def password_protected(f):
     def _password_protected(self, name, data):
         password_information = self.database._get_password_information(name)
         if not self.valid(data["password"], *password_information):
-            raise Exception("Permission Denied")
+            raise Exception("Permission Denied")  # FIXME is this something else then 500 internal server?
 
         return f(self, name, data)
 
     return _password_protected
 
 
-class PasswordProtected(Database):
+class PasswordProtected(object):  # FIXME .(ProtectableDatabase)? (how to deal with Valid together with Database/PasswordProtectableDatabase)
     """Higher order database, takes a database and returns a password
     protected one.
 
@@ -53,31 +53,23 @@ class PasswordProtected(Database):
             )
         )
 
-    def exists(self, name):
-        return self.database.exists(name)
-
-    def get(self, name):
-        return self.database.get(name)
-
     @password_protected
     def delete(self, name, data):
-        hash_value, salt_value = self.database._get_password_information(name)
-        if not self.valid(data["password"], hash_value, salt_value):
-            raise Exception("Permission Denied")
-        return self.database.delete(name)
+        return self.database.delete(name, data)
 
     @password_protected
     def update(self, name, data):
+        if "new_password" in data:
+            self._set_password_information(  # FIXME where does this belong?
+                name,
+                self.password_information(data["new_password"])
+            )
+
         return self.database.update(name, data)
 
-    def connect(self):
-        return self.database.connect()
+    def __getattr__(self, attribute_name):  # TODO Metaclass: Wrapper(wrapped_name)  return getattr(getattr(self, wrapped_name), attribute_name)
+        return getattr(self.database, attribute_name)
 
-    def close(self):
-        return self.database.close()
-
-    def init(self):
-        return self.database.init()
     def password_information(
         self,
         password,

@@ -45,18 +45,23 @@ class UserAPIv0(views.MethodView):
     def post(self):
         #FIXME if name is missing (how about password?)
         #FIXME if email is missing
+        #FIXME name already in use
+        #FIXME invalid data (or password)
         data = request.get_json()
         g._database.create(data["name"], data)
         return dict()  # FIXME what is the proper response?
 
     @return_json(pretty)
     def delete(self, name):
+        #FIXME if name doesn't exists
         data = request.get_json()
         g._database.delete(name, data)
         return dict()  # FIXME what is the proper response?
 
     @return_json(pretty)
     def patch(self, name):
+        #FIXME name already in use
+        #FIXME new_password
         data = request.get_json()
         g._database.update(name, data)
         return dict()  # FIXME what is the proper response?
