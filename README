@@ -1,9 +1,14 @@
 user_data_service
 =================
+
 Depency
 -------
 flask
 
-Run
----
-./main.py
+Run Service
+-----------
+make run
+
+Try Service
+-------
+make try
