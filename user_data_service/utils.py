@@ -6,7 +6,11 @@ from functools import wraps, partial
 
 import json
 
-from werkzeug.exceptions import default_exceptions, HTTPException
+from werkzeug.exceptions import (
+    default_exceptions,
+    HTTPException,
+    HTTP_STATUS_CODES,
+)
 import flask
 from flask import g
 
@@ -50,6 +54,13 @@ def values(keys):
     return _values
 
 
+def http_exception_message(code):
+    return "{}: {}".format(
+        code,
+        HTTP_STATUS_CODES[code],
+    )
+
+
 def always_json_response(application_prototype):
     """Wraps a Flask application to make it always return a JSON response.
 
@@ -67,7 +78,7 @@ def always_json_response(application_prototype):
             response = json_response(
                 {
                     'message': str(e) if isinstance(e, HTTPException)
-                        else "500: Internal Server Error"
+                        else http_exception_message(500)
                 },
                 pretty=True
             )

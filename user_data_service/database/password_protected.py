@@ -60,7 +60,7 @@ class PasswordProtected(object):  # FIXME .(ProtectableDatabase)? (how to deal w
     @password_protected
     def update(self, name, data):
         if "new_password" in data:
-            self._set_password_information(  # FIXME where does this belong?
+            self._set_password_information(
                 name,
                 self.password_information(data["new_password"])
             )
@@ -103,4 +103,7 @@ class PasswordProtected(object):  # FIXME .(ProtectableDatabase)? (how to deal w
         hash_value,
         salt_value
     ):
-        return self.hash_(password, salt_value) == hash_value
+        password_hash_value = self.hash_(password, salt_value)
+        password_valid = (password_hash_value == hash_value)
+
+        return password_valid

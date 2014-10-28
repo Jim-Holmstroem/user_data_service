@@ -7,10 +7,7 @@ import re
 
 
 def valid_name(name):
-    """Validates a name.
-
-    Arguments
-    ---------
+    """Validates a name.  Arguments ---------
     name : str
         The name to validate
 
@@ -100,12 +97,12 @@ def valid(data):
 
 
 def valid_protected(f):
-    @wraps(f)
-    def _valid_protected(self, name, data):
-        if not valid(data):
-            raise Exception('Invalid data')  # TODO make it more specific
-        return f(self, name, data)
-    return _valid_protected
+        @wraps(f)
+        def _valid_protected(self, name, data):
+            if not valid(data):
+                raise Exception('Invalid data')  # TODO make it more specific
+            return f(self, name, data)
+        return _valid_protected
 
 
 class Valid(object):  # TODO .(Database)

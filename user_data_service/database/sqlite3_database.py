@@ -19,8 +19,6 @@ class SQLite3Database(ProtectableDatabase):
         self.database_name = database_name
 
     def create(self, name, data, new_password_information=("", "")):
-# FIXME if some of this doesn't exist .. (also at the level of password
-# protected)
         with closing(self.conn.cursor()) as c:
             c.execute(
                 "INSERT INTO users VALUES (?, ?, ?, ?, ?)",
@@ -31,7 +29,7 @@ class SQLite3Database(ProtectableDatabase):
                 ) +
                 new_password_information
             )
-            self.conn.commit()  # FIXME this must be commited
+            self.conn.commit()
 
     def exists(self, name):
         with closing(self.conn.cursor()) as c:
@@ -99,7 +97,7 @@ class SQLite3Database(ProtectableDatabase):
                     update_queary_template,
                     valid_update_values + (name, )
                 )
-                self.conn.commit()  # FIXME this must be commited
+                self.conn.commit()
 
 
     def _get_password_information(self, name):
@@ -123,7 +121,7 @@ class SQLite3Database(ProtectableDatabase):
                 ),
                 password_information + (name, )
             )
-            self.conn.commit()  # FIXME this must be commited
+            self.conn.commit()
 
     def connect(self):
         self.conn = sqlite3.connect(self.database_name)
@@ -145,4 +143,4 @@ class SQLite3Database(ProtectableDatabase):
         )
         with closing(self.conn.cursor()) as c:
             c.execute(schema)
-            self.conn.commit()  # FIXME this must be commited
+            self.conn.commit()

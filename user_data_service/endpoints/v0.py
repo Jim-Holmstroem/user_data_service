@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from flask import views, request, g
+from werkzeug.exceptions import HTTP_STATUS_CODES, HTTPException
 
 from ..utils import return_json, database
 
@@ -35,36 +36,33 @@ class UserAPIv0(views.MethodView):
         if g._database.exists(name):
             data = g._database.get(name)
 
-            return dict(  # FIXME: always have a top context {"user": {"name":..}}} or such
+            return dict(
                 data=data,
             )
+
         else:
-            1/0  # FIXME proper handling of "404"
+            raise HTTPException(HTTP_STATUS_CODES[404], 404)
 
     @return_json(pretty)
     def post(self):
-        #FIXME if name is missing (how about password?)
-        #FIXME if email is missing
-        #FIXME name already in use
-        #FIXME invalid data (or password)
         data = request.get_json()
         g._database.create(data["name"], data)
-        return dict()  # FIXME what is the proper response?
+
+        return dict()
 
     @return_json(pretty)
     def delete(self, name):
-        #FIXME if name doesn't exists
         data = request.get_json()
         g._database.delete(name, data)
-        return dict()  # FIXME what is the proper response?
+
+        return dict()
 
     @return_json(pretty)
     def patch(self, name):
-        #FIXME name already in use
-        #FIXME new_password
         data = request.get_json()
         g._database.update(name, data)
-        return dict()  # FIXME what is the proper response?
+
+        return dict()
 
 
 def install(application):
