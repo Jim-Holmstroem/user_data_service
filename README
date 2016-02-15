@@ -1,5 +1,6 @@
 user_data_service
 =================
+Simple rest API for handling users and password.
 
 Depency
 -------
